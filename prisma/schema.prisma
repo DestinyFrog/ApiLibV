@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  iid          Int             @id @default(autoincrement())
+  id           String          @unique @default(uuid()) @db.VarChar(36)
+  title        String
+  release_year Int?
+  autor        Author?         @relation(fields: [authorIid], references: [iid])
+  authorIid    Int?
+  shelves      BookOnShelves[]
+}
+
+model Author {
+  iid         Int    @id @default(autoincrement())
+  id          String @unique @default(uuid()) @db.VarChar(36)
+  name        String
+  nationality String
+  Books       Book[]
+}
+
+model User {
+  iid      Int       @id @default(autoincrement())
+  id       String    @unique @default(uuid()) @db.VarChar(36)
+  name     String
+  email    String    @unique
+  password String    @db.VarChar(36)
+  shelves  Shelves[]
+}
+
+model BookOnShelves {
+  iid        Int     @id @default(autoincrement())
+  shelve     Shelves @relation(fields: [shelvesIid], references: [iid])
+  book       Book    @relation(fields: [bookIid], references: [iid])
+  shelvesIid Int
+  bookIid    Int
+}
+
+model Shelves {
+  iid     Int             @id @default(autoincrement())
+  id      String          @unique @default(uuid()) @db.VarChar(36)
+  books   BookOnShelves[]
+  User    User?           @relation(fields: [userIid], references: [iid])
+  userIid Int?
+}
